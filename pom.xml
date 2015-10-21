@@ -3,7 +3,7 @@
   <groupId>com.github.g3force</groupId>
   <artifactId>configurable</artifactId>
   <version>1.0</version>
-  <name>Configurable</name>
+  <name>configurable</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,8 +26,8 @@
 
     <dependency>
       <groupId>com.github.g3force</groupId>
-      <artifactId>s2vconverter</artifactId>
-      <version>1.0</version>
+      <artifactId>String2ValueConverter</artifactId>
+      <version>v1.3</version>
     </dependency>
 
     <dependency>
@@ -43,6 +43,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
