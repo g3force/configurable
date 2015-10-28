@@ -36,11 +36,11 @@ public class ConfigAnnotationProcessor
 {
 	private static final Logger					log				= Logger.getLogger(ConfigAnnotationProcessor.class
 																						.getName());
-	
+																						
 	private final List<ConfigurableFieldData>	data				= new ArrayList<ConfigurableFieldData>();
 	private final Map<Field, String>				currentSpezis	= new HashMap<>();
-	private static String2ValueConverter		s2vConv			= new String2ValueConverter();
-	
+	private static String2ValueConverter		s2vConv			= String2ValueConverter.getDefault();
+																				
 	private static class ConfigurableFieldData
 	{
 		private String		className;
@@ -56,17 +56,6 @@ public class ConfigAnnotationProcessor
 	 */
 	public ConfigAnnotationProcessor()
 	{
-	}
-	
-	
-	/**
-	 * Replace {@link String2ValueConverter} by your own implementation
-	 * 
-	 * @param conv
-	 */
-	public static void registerString2ValueConverter(String2ValueConverter conv)
-	{
-		s2vConv = conv;
 	}
 	
 	
@@ -107,7 +96,6 @@ public class ConfigAnnotationProcessor
 			classesAndSubClasses.addAll(getAllSubClasses(clazz));
 		}
 		
-		String basePackage = classesAndSubClasses.iterator().next().getPackage().getName();
 		Map<Class<?>, List<ConfigurableFieldData>> classesAndSubClassesMap = new LinkedHashMap<Class<?>, List<ConfigurableFieldData>>();
 		for (Class<?> clazz : classesAndSubClasses)
 		{
@@ -115,24 +103,15 @@ public class ConfigAnnotationProcessor
 			if (!dataRead.isEmpty())
 			{
 				classesAndSubClassesMap.put(clazz, dataRead);
-				
-				String packageName = clazz.getPackage().getName();
-				basePackage = greatestCommonPrefix(basePackage, packageName);
 			}
 		}
 		
 		config.getRoot().setName(name);
-		config.getRoot().addAttribute(new HierarchicalConfiguration.Node("base", basePackage));
 		for (Map.Entry<Class<?>, List<ConfigurableFieldData>> entry : classesAndSubClassesMap.entrySet())
 		{
 			Class<?> clazz = entry.getKey();
 			String clazzName = clazz.getName();
-			if (!clazzName.startsWith(basePackage))
-			{
-				log.error("Invalid class: " + clazzName + ". Must start with: " + basePackage);
-				continue;
-			}
-			String clazzKey = clazzName.substring(basePackage.length() + 1);
+			String clazzKey = clazzName;
 			
 			List<ConfigurableFieldData> dataRead = entry.getValue();
 			for (ConfigurableFieldData fieldData : dataRead)
@@ -149,28 +128,6 @@ public class ConfigAnnotationProcessor
 		}
 		
 		return config;
-	}
-	
-	
-	private String greatestCommonPrefix(final String a, final String b)
-	{
-		String[] pkgsA = a.split("\\.");
-		String[] pkgsB = b.split("\\.");
-		int minLength = Math.min(pkgsA.length, pkgsB.length);
-		StringBuilder prefix = new StringBuilder();
-		for (int i = 0; i < minLength; i++)
-		{
-			if (!pkgsA[i].equals(pkgsB[i]))
-			{
-				return prefix.toString();
-			}
-			if (i != 0)
-			{
-				prefix.append('.');
-			}
-			prefix.append(pkgsA[i]);
-		}
-		return prefix.toString();
 	}
 	
 	
@@ -199,19 +156,18 @@ public class ConfigAnnotationProcessor
 	 * (re)load configuration from given config object.
 	 * Note: It will not be applies yet, use one of the apply methods for this.
 	 * 
-	 * @param config
+	 * @param config full merged config to be used
 	 */
 	public void loadConfiguration(final HierarchicalConfiguration config)
 	{
 		data.clear();
 		
 		List<ConfigurationNode> attrs = config.getRoot().getAttributes("base");
-		if (attrs.size() != 1)
+		String base = "";
+		if (attrs.size() == 1)
 		{
-			log.error("No unique base package path found: " + attrs);
-			return;
+			base = attrs.get(0).getValue().toString();
 		}
-		String base = attrs.get(0).getValue().toString();
 		
 		List<ConfigurationNode> classNodes = config.getRoot().getChildren();
 		
@@ -264,20 +220,17 @@ public class ConfigAnnotationProcessor
 	{
 		for (ConfigurableFieldData fieldData : data)
 		{
-			if (!fieldData.fieldSpezi.equals(spezi))
+			if (fieldData.fieldSpezi.equals(spezi))
 			{
-				continue;
+				try
+				{
+					Class<?> clazz = Class.forName(fieldData.className);
+					write(clazz, null, fieldData);
+				} catch (ClassNotFoundException err)
+				{
+					log.error("Could not find class with name " + fieldData.className);
+				}
 			}
-			Class<?> clazz;
-			try
-			{
-				clazz = Class.forName(fieldData.className);
-			} catch (ClassNotFoundException err)
-			{
-				log.error("Could not find class with name " + fieldData.className);
-				continue;
-			}
-			write(clazz, null, fieldData);
 		}
 	}
 	
@@ -288,26 +241,24 @@ public class ConfigAnnotationProcessor
 	{
 		for (ConfigurableFieldData fieldData : data)
 		{
-			Class<?> clazz;
 			try
 			{
-				clazz = Class.forName(fieldData.className);
+				Class<?> clazz = Class.forName(fieldData.className);
+				for (Field field : clazz.getDeclaredFields())
+				{
+					if (field.getName().equals(fieldData.fieldName))
+					{
+						String curSpezi = currentSpezis.get(field);
+						if ((curSpezi == null) || curSpezi.equals(fieldData.fieldSpezi))
+						{
+							write(clazz, null, fieldData);
+						}
+						break;
+					}
+				}
 			} catch (ClassNotFoundException err)
 			{
-				log.error("Could not find class with name " + fieldData.className);
-				continue;
-			}
-			for (Field field : clazz.getDeclaredFields())
-			{
-				if (field.getName().equals(fieldData.fieldName))
-				{
-					String curSpezi = currentSpezis.get(field);
-					if ((curSpezi == null) || curSpezi.equals(fieldData.fieldSpezi))
-					{
-						write(clazz, null, fieldData);
-					}
-					break;
-				}
+				log.warn("Could not find class with name " + fieldData.className);
 			}
 		}
 	}
@@ -333,6 +284,29 @@ public class ConfigAnnotationProcessor
 			}
 			clazz = clazz.getSuperclass();
 		} while ((clazz != null) && !clazz.equals(Object.class));
+	}
+	
+	
+	/**
+	 * Apply values to all fields of the given class. SubClasses will be considered.
+	 * 
+	 * @param clazz
+	 * @param spezi
+	 */
+	public void apply(final Class<?> clazz, final String spezi)
+	{
+		Class<?> c = clazz;
+		do
+		{
+			for (ConfigurableFieldData fieldData : data)
+			{
+				if (fieldData.className.equals(c.getName()) && fieldData.fieldSpezi.equals(spezi))
+				{
+					write(c, null, fieldData);
+				}
+			}
+			c = c.getSuperclass();
+		} while ((c != null) && !c.equals(Object.class));
 	}
 	
 	
@@ -470,7 +444,8 @@ public class ConfigAnnotationProcessor
 		{
 			String className = classNode.getName();
 			
-			if (!className.matches("[A-Z].*") && !cfgBase.configurationsAt(className).isEmpty()
+			if (!className.matches("[A-Z].*")
+					&& !cfgBase.configurationsAt(className).isEmpty()
 					&& !cfg.configurationsAt(className).isEmpty())
 			{
 				// is not a class, so step deeper in hierarchy
@@ -478,8 +453,6 @@ public class ConfigAnnotationProcessor
 						cfg.configurationAt(className));
 				continue;
 			}
-			
-			List<ConfigurationNode> classNodeChildren = cfgBase.getRootNode().getChildren(className);
 			
 			if (!className.matches("[A-Z].*"))
 			{
@@ -491,6 +464,7 @@ public class ConfigAnnotationProcessor
 				continue;
 			}
 			
+			List<ConfigurationNode> classNodeChildren = cfgBase.getRootNode().getChildren(className);
 			if (classNodeChildren.size() > 1)
 			{
 				log.error("Expected at most one child, but was: " + classNodeChildren);

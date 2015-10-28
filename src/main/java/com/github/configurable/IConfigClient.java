@@ -14,7 +14,7 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 /**
  * @author Gero
  */
-public interface IConfigClient extends IConfigObserver
+public interface IConfigClient
 {
 	/**
 	 * @return The common name of this {@link IConfigClient}
@@ -23,47 +23,86 @@ public interface IConfigClient extends IConfigObserver
 	
 	
 	/**
-	 * @return The path to the config-files
+	 * @return The path to the config-file
 	 */
-	String getConfigPath();
+	String getPath();
 	
 	
 	/**
-	 * @return The unique key which is used to store the user-settings of Sumatra
-	 */
-	String getConfigKey();
-	
-	
-	/**
-	 * @return the defaultValue
-	 */
-	String getDefaultValue();
-	
-	
-	/**
-	 * @return Whether this config should be editable
-	 */
-	boolean isEditable();
-	
-	
-	/**
-	 * Get default configuration that should be merged with existing config.
+	 * Get configuration from classes
 	 * 
 	 * @return
 	 */
-	HierarchicalConfiguration getDefaultConfig();
+	HierarchicalConfiguration getLocalConfig();
 	
 	
 	/**
-	 * 
-	 */
-	void clearObservers();
-	
-	
-	/**
-	 * Is the config file required? Must it exist?
+	 * Get configuration from file
 	 * 
 	 * @return
 	 */
-	boolean isRequired();
+	HierarchicalConfiguration getFileConfig();
+	
+	
+	/**
+	 * Get configuration from classes and file
+	 * 
+	 * @return
+	 */
+	HierarchicalConfiguration getCombinedConfig();
+	
+	
+	/**
+	 * Get configuration from file
+	 * 
+	 * @return
+	 */
+	HierarchicalConfiguration getCurrentConfig();
+	
+	
+	/**
+	 * Load from file
+	 * 
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 */
+	void loadFileConfig();
+	
+	
+	/**
+	 * Load from file
+	 * 
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 */
+	void loadLocalConfig();
+	
+	
+	/**
+	 * Load from file
+	 * 
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 */
+	void loadCombinedConfig();
+	
+	
+	/**
+	 * Save to file
+	 * 
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @return
+	 */
+	boolean saveCurrentConfig();
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param observer
+	 */
+	void addObserver(final IConfigObserver observer);
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param observer
+	 */
+	void removeObserver(final IConfigObserver observer);
 }

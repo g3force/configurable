@@ -11,8 +11,8 @@ package com.github.configurable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 
@@ -24,19 +24,16 @@ import org.apache.log4j.Logger;
  */
 public class ConfigRegistration
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	private static final Logger					log		= Logger.getLogger(ConfigRegistration.class.getName());
-	private final Map<String, ConfigClient>	configs	= new LinkedHashMap<String, ConfigClient>();
-	private static final ConfigRegistration	INSTANCE	= new ConfigRegistration();
-	
-	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
-	
+	@SuppressWarnings("unused")
+	private static final Logger						log			= Logger.getLogger(ConfigRegistration.class.getName());
+	private final Map<String, ConfigClient>		configs		= new LinkedHashMap<String, ConfigClient>();
+	private static final ConfigRegistration		INSTANCE		= new ConfigRegistration();
+																				
+	private static String								defPath		= "config/";
+																				
+	private static List<IConfigClientsObserver>	observers	= new CopyOnWriteArrayList<IConfigClientsObserver>();
+																				
+																				
 	/**
 	  * 
 	  */
@@ -46,12 +43,74 @@ public class ConfigRegistration
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 * @param client
+	 * @param observer
 	 */
-	public static void registerConfigClient(final ConfigClient client)
+	public static synchronized void addObserver(final IConfigClientsObserver observer)
 	{
-		INSTANCE.configs.put(client.getName().toLowerCase(Locale.ENGLISH), client);
+		observers.add(observer);
+	}
+	
+	
+	/**
+	 * @param observer
+	 */
+	public static synchronized void removeObserver(final IConfigClientsObserver observer)
+	{
+		observers.remove(observer);
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param cc
+	 */
+	public static synchronized void registerConfigClient(final ConfigClient cc)
+	{
+		INSTANCE.configs.put(cc.getName(), cc);
+		for (IConfigClientsObserver o : observers)
+		{
+			o.onNewConfigClient(cc);
+		}
+	}
+	
+	
+	private ConfigClient getConfigClient(final String key)
+	{
+		ConfigClient cc = configs.get(key);
+		if (cc == null)
+		{
+			cc = new ConfigClient(defPath, key);
+			registerConfigClient(cc);
+			cc.applyConfig();
+		}
+		return cc;
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param key
+	 * @param classes
+	 */
+	public static synchronized void registerClass(final String key, final Class<?>... classes)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(key);
+		for (Class<?> c : classes)
+		{
+			cc.putClass(c);
+		}
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param key
+	 * @return
+	 */
+	public static synchronized boolean save(final String key)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(key);
+		return cc.saveCurrentConfig();
 	}
 	
 	
@@ -61,14 +120,9 @@ public class ConfigRegistration
 	 * @param cat
 	 * @param callback
 	 */
-	public static void registerConfigurableCallback(final Enum<?> cat, final IConfigObserver callback)
+	public static synchronized void registerConfigurableCallback(final String cat, final IConfigObserver callback)
 	{
-		ConfigClient cc = INSTANCE.configs.get(cat.name().toLowerCase(Locale.ENGLISH));
-		if (cc == null)
-		{
-			log.error("Categorie " + cat + " not found");
-			return;
-		}
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.addObserver(callback);
 	}
 	
@@ -79,14 +133,9 @@ public class ConfigRegistration
 	 * @param cat
 	 * @param callback
 	 */
-	public static void unregisterConfigurableCallback(final Enum<?> cat, final IConfigObserver callback)
+	public static synchronized void unregisterConfigurableCallback(final String cat, final IConfigObserver callback)
 	{
-		ConfigClient cc = INSTANCE.configs.get(cat.name().toLowerCase(Locale.ENGLISH));
-		if (cc == null)
-		{
-			log.error("Categorie " + cat + " not found");
-			return;
-		}
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.removeObserver(callback);
 	}
 	
@@ -98,14 +147,9 @@ public class ConfigRegistration
 	 * @param cat
 	 * @param spezi
 	 */
-	public static void applySpezis(final Object obj, final Enum<?> cat, final String spezi)
+	public static synchronized void applySpezis(final Object obj, final String cat, final String spezi)
 	{
-		ConfigClient cc = INSTANCE.configs.get(cat.name().toLowerCase(Locale.ENGLISH));
-		if (cc == null)
-		{
-			log.error("Categorie " + cat + " not found");
-			return;
-		}
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		// first apply default
 		cc.applyConfigToObject(obj, "");
 		// then the spezi
@@ -119,14 +163,9 @@ public class ConfigRegistration
 	 * @param cat
 	 * @param spezi
 	 */
-	public static void applySpezis(final Enum<?> cat, final String spezi)
+	public static synchronized void applySpezis(final String cat, final String spezi)
 	{
-		ConfigClient cc = INSTANCE.configs.get(cat.name().toLowerCase(Locale.ENGLISH));
-		if (cc == null)
-		{
-			log.error("Categorie " + cat + " not found");
-			return;
-		}
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.applySpezi(spezi);
 	}
 	
@@ -136,7 +175,7 @@ public class ConfigRegistration
 	 * 
 	 * @param spezi
 	 */
-	public static void applySpezis(final String spezi)
+	public static synchronized void applySpezis(final String spezi)
 	{
 		for (ConfigClient cc : INSTANCE.configs.values())
 		{
@@ -146,9 +185,53 @@ public class ConfigRegistration
 	
 	
 	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param cat
+	 */
+	public static synchronized void applyConfig(final String cat)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.applyConfig();
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param cat
+	 */
+	public static synchronized void loadConfigFromLocal(final String cat)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.loadLocalConfig();
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param cat
+	 */
+	public static synchronized void loadConfigFromFile(final String cat)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.loadFileConfig();
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * @param cat
+	 */
+	public static synchronized void loadConfigCombined(final String cat)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.loadCombinedConfig();
+	}
+	
+	
+	/**
 	 * @return
 	 */
-	public static List<IConfigClient> getConfigClients()
+	public static synchronized List<IConfigClient> getConfigClients()
 	{
 		return new ArrayList<IConfigClient>(INSTANCE.configs.values());
 	}

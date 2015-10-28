@@ -22,10 +22,4 @@ public interface IConfigObserver
 	 * @param newConfig
 	 */
 	void onLoad(HierarchicalConfiguration newConfig);
-	
-	
-	/**
-	 * @param freshConfig
-	 */
-	void onReload(HierarchicalConfiguration freshConfig);
 }

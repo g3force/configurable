@@ -22,10 +22,9 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 public class ConfigClient extends AConfigClient
 {
 	private final ConfigAnnotationProcessor	cap	= new ConfigAnnotationProcessor();
-	private final String								name;
 	private final Set<Class<?>>					classes;
-	
-	
+															
+															
 	/**
 	 * @param path
 	 * @param name
@@ -45,24 +44,15 @@ public class ConfigClient extends AConfigClient
 	 */
 	public ConfigClient(final String path, final String name, final Set<Class<?>> classes)
 	{
-		super(name, path, path + "." + name, name + ".xml", true);
-		this.name = name;
+		super(name, path);
 		this.classes = classes;
 	}
 	
 	
 	@Override
-	public void onLoad(final HierarchicalConfiguration newConfig)
+	public HierarchicalConfiguration getLocalConfig()
 	{
-		cap.loadConfiguration(newConfig);
-		cap.applyAll();
-	}
-	
-	
-	@Override
-	public HierarchicalConfiguration getDefaultConfig()
-	{
-		return cap.getDefaultConfig(classes, name);
+		return cap.getDefaultConfig(classes, getName());
 	}
 	
 	
@@ -100,13 +90,12 @@ public class ConfigClient extends AConfigClient
 	}
 	
 	
-	@Override
-	public boolean isRequired()
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 */
+	public void applyConfig()
 	{
-		return false;
+		cap.loadConfiguration(getCurrentConfig());
+		cap.applyAll();
 	}
-	
-	// --------------------------------------------------------------------------
-	// --- getter/setter --------------------------------------------------------
-	// --------------------------------------------------------------------------
 }
