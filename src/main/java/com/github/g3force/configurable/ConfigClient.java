@@ -6,7 +6,7 @@
  * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
  * *********************************************************
  */
-package com.github.configurable;
+package com.github.g3force.configurable;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

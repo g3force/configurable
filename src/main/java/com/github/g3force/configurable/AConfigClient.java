@@ -6,7 +6,7 @@
  * Author(s): Gero
  * *********************************************************
  */
-package com.github.configurable;
+package com.github.g3force.configurable;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
