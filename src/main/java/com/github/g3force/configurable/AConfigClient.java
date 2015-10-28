@@ -16,12 +16,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.tree.NodeCombiner;
-import org.apache.commons.configuration.tree.UnionCombiner;
 import org.apache.log4j.Logger;
 
 
@@ -53,6 +50,7 @@ public abstract class AConfigClient implements IConfigClient
 		super();
 		this.name = name;
 		this.path = path;
+		loadFileConfig();
 	}
 	
 	
@@ -82,17 +80,20 @@ public abstract class AConfigClient implements IConfigClient
 	@Override
 	public HierarchicalConfiguration getCombinedConfig()
 	{
-		// Create and initialize the node combiner
-		NodeCombiner combiner = new UnionCombiner();
-		combiner.addListNode("table"); // mark table as list node
-		// this is needed only if there are ambiguities
+		HierarchicalConfiguration cfg = new HierarchicalConfiguration(getLocalConfig());
+		ConfigAnnotationProcessor.merge(cfg, getFileConfig());
+		return cfg;
 		
-		// Construct the combined configuration
-		CombinedConfiguration cc = new CombinedConfiguration(combiner);
-		cc.addConfiguration(getLocalConfig());
-		cc.addConfiguration(getFileConfig());
-		
-		return cc;
+		// does not work:
+		// // Create and initialize the node combiner
+		// NodeCombiner combiner = new OverrideCombiner();
+		//
+		// // Construct the combined configuration
+		// CombinedConfiguration cc = new CombinedConfiguration(combiner);
+		// cc.addConfiguration(getFileConfig());
+		// cc.addConfiguration(getLocalConfig());
+		//
+		// return cc;
 	}
 	
 	
