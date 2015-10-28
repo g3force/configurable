@@ -96,6 +96,7 @@ public class ConfigAnnotationProcessor
 			classesAndSubClasses.addAll(getAllSubClasses(clazz));
 		}
 		
+		String basePackage = classesAndSubClasses.iterator().next().getPackage().getName();
 		Map<Class<?>, List<ConfigurableFieldData>> classesAndSubClassesMap = new LinkedHashMap<Class<?>, List<ConfigurableFieldData>>();
 		for (Class<?> clazz : classesAndSubClasses)
 		{
@@ -103,15 +104,24 @@ public class ConfigAnnotationProcessor
 			if (!dataRead.isEmpty())
 			{
 				classesAndSubClassesMap.put(clazz, dataRead);
+				
+				String packageName = clazz.getPackage().getName();
+				basePackage = greatestCommonPrefix(basePackage, packageName);
 			}
 		}
 		
 		config.getRoot().setName(name);
+		config.getRoot().addAttribute(new HierarchicalConfiguration.Node("base", basePackage));
 		for (Map.Entry<Class<?>, List<ConfigurableFieldData>> entry : classesAndSubClassesMap.entrySet())
 		{
 			Class<?> clazz = entry.getKey();
 			String clazzName = clazz.getName();
-			String clazzKey = clazzName;
+			if (!clazzName.startsWith(basePackage))
+			{
+				log.error("Invalid class: " + clazzName + ". Must start with: " + basePackage);
+				continue;
+			}
+			String clazzKey = clazzName.substring(basePackage.length() + 1);
 			
 			List<ConfigurableFieldData> dataRead = entry.getValue();
 			for (ConfigurableFieldData fieldData : dataRead)
@@ -128,6 +138,28 @@ public class ConfigAnnotationProcessor
 		}
 		
 		return config;
+	}
+	
+	
+	private String greatestCommonPrefix(final String a, final String b)
+	{
+		String[] pkgsA = a.split("\\.");
+		String[] pkgsB = b.split("\\.");
+		int minLength = Math.min(pkgsA.length, pkgsB.length);
+		StringBuilder prefix = new StringBuilder();
+		for (int i = 0; i < minLength; i++)
+		{
+			if (!pkgsA[i].equals(pkgsB[i]))
+			{
+				return prefix.toString();
+			}
+			if (i != 0)
+			{
+				prefix.append('.');
+			}
+			prefix.append(pkgsA[i]);
+		}
+		return prefix.toString();
 	}
 	
 	
@@ -163,11 +195,12 @@ public class ConfigAnnotationProcessor
 		data.clear();
 		
 		List<ConfigurationNode> attrs = config.getRoot().getAttributes("base");
-		String base = "";
-		if (attrs.size() == 1)
+		if (attrs.size() != 1)
 		{
-			base = attrs.get(0).getValue().toString();
+			log.error("No unique base package path found: " + attrs);
+			return;
 		}
+		String base = attrs.get(0).getValue().toString();
 		
 		List<ConfigurationNode> classNodes = config.getRoot().getChildren();
 		
