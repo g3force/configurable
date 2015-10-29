@@ -12,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -58,13 +60,17 @@ public abstract class AConfigClient implements IConfigClient
 	public HierarchicalConfiguration getFileConfig()
 	{
 		String fileName = name + ".xml";
-		String filePath = Paths.get(path, fileName).toString();
+		Path fPath = Paths.get(path, fileName);
+		String filePath = fPath.toString();
 		XMLConfiguration cfg = new XMLConfiguration();
 		try
 		{
 			cfg.setDelimiterParsingDisabled(true);
 			cfg.setFileName(fileName);
-			cfg.load(filePath);
+			if (Files.exists(fPath))
+			{
+				cfg.load(filePath);
+			}
 		} catch (final ConfigurationException err)
 		{
 			log.error("Unable to load config '" + name + "' from '" + filePath + "':", err);

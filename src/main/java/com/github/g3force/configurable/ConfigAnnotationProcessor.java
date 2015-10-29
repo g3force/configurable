@@ -195,12 +195,11 @@ public class ConfigAnnotationProcessor
 		data.clear();
 		
 		List<ConfigurationNode> attrs = config.getRoot().getAttributes("base");
-		if (attrs.size() != 1)
+		String base = "";
+		if (attrs.size() == 1)
 		{
-			log.error("No unique base package path found: " + attrs);
-			return;
+			base = attrs.get(0).getValue().toString();
 		}
-		String base = attrs.get(0).getValue().toString();
 		
 		List<ConfigurationNode> classNodes = config.getRoot().getChildren();
 		
