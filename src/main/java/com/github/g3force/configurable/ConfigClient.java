@@ -97,5 +97,6 @@ public class ConfigClient extends AConfigClient
 	{
 		cap.loadConfiguration(getCurrentConfig());
 		cap.applyAll();
+		notifyAppliedConfig();
 	}
 }

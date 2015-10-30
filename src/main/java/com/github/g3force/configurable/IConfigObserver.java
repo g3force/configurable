@@ -8,9 +8,6 @@
  */
 package com.github.g3force.configurable;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-
-
 /**
  * Used to observe a config client
  * 
@@ -19,7 +16,17 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 public interface IConfigObserver
 {
 	/**
-	 * @param newConfig
+	 * @param configClient
 	 */
-	void onLoad(HierarchicalConfiguration newConfig);
+	default void afterApply(final IConfigClient configClient)
+	{
+	}
+	
+	
+	/**
+	 * @param configClient
+	 */
+	default void onLoad(final IConfigClient configClient)
+	{
+	}
 }

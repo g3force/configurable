@@ -140,7 +140,19 @@ public abstract class AConfigClient implements IConfigClient
 	{
 		for (IConfigObserver o : observers)
 		{
-			o.onLoad(config);
+			o.onLoad(this);
+		}
+	}
+	
+	
+	/**
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 */
+	public void notifyAppliedConfig()
+	{
+		for (IConfigObserver o : observers)
+		{
+			o.afterApply(this);
 		}
 	}
 	
