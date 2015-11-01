@@ -50,9 +50,15 @@ public @interface Configurable
 	 */
 	String defValue() default "";
 	
+	
 	/**
+	 * @return
 	 */
-	public static enum EDummy
-	{
-	}
+	String[] defValueSpezis() default {};
+	
+	
+	/**
+	 * @return
+	 */
+	String category() default "";
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.log4j.Logger;
 
 
@@ -69,7 +70,7 @@ public class ConfigRegistration
 		INSTANCE.configs.put(cc.getName(), cc);
 		for (IConfigClientsObserver o : observers)
 		{
-			o.onNewConfigClient(cc);
+			o.onNewConfigClient(cc.getName());
 		}
 	}
 	
@@ -81,6 +82,7 @@ public class ConfigRegistration
 		{
 			cc = new ConfigClient(defPath, key);
 			registerConfigClient(cc);
+			cc.getCap().loadConfiguration(cc.getFileConfig());
 			cc.applyConfig();
 		}
 		return cc;
@@ -150,10 +152,7 @@ public class ConfigRegistration
 	public static synchronized void applySpezis(final Object obj, final String cat, final String spezi)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
-		// first apply default
-		cc.applyConfigToObject(obj, "");
-		// then the spezi
-		cc.applyConfigToObject(obj, spezi);
+		cc.getCap().applySpezi(obj, spezi);
 	}
 	
 	
@@ -163,10 +162,10 @@ public class ConfigRegistration
 	 * @param cat
 	 * @param spezi
 	 */
-	public static synchronized void applySpezis(final String cat, final String spezi)
+	public static synchronized void applySpezi(final String cat, final String spezi)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
-		cc.applySpezi(spezi);
+		cc.getCap().applySpezi(spezi);
 	}
 	
 	
@@ -175,17 +174,18 @@ public class ConfigRegistration
 	 * 
 	 * @param spezi
 	 */
-	public static synchronized void applySpezis(final String spezi)
+	public static synchronized void applyGlobalSpezi(final String spezi)
 	{
 		for (ConfigClient cc : INSTANCE.configs.values())
 		{
-			cc.applySpezi(spezi);
+			cc.getCap().applySpezi(spezi);
 		}
 	}
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+	 * Apply all and notify observers
+	 * 
 	 * @param cat
 	 */
 	public static synchronized void applyConfig(final String cat)
@@ -196,43 +196,32 @@ public class ConfigRegistration
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 * @param cat
+	 * @return
 	 */
-	public static synchronized void loadConfigFromLocal(final String cat)
+	public static synchronized HierarchicalConfiguration getConfig(final String cat)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
-		cc.loadLocalConfig();
+		return cc.getConfig();
 	}
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 * @param cat
+	 * @return
 	 */
-	public static synchronized void loadConfigFromFile(final String cat)
+	public static synchronized HierarchicalConfiguration loadConfig(final String cat)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
-		cc.loadFileConfig();
-	}
-	
-	
-	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 * @param cat
-	 */
-	public static synchronized void loadConfigCombined(final String cat)
-	{
-		ConfigClient cc = INSTANCE.getConfigClient(cat);
-		cc.loadCombinedConfig();
+		return cc.loadConfig();
 	}
 	
 	
 	/**
 	 * @return
 	 */
-	public static synchronized List<IConfigClient> getConfigClients()
+	public static synchronized List<String> getConfigClients()
 	{
-		return new ArrayList<IConfigClient>(INSTANCE.configs.values());
+		return new ArrayList<>(INSTANCE.configs.keySet());
 	}
 }

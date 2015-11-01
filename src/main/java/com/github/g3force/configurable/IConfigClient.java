@@ -29,14 +29,6 @@ public interface IConfigClient
 	
 	
 	/**
-	 * Get configuration from classes
-	 * 
-	 * @return
-	 */
-	HierarchicalConfiguration getLocalConfig();
-	
-	
-	/**
 	 * Get configuration from file
 	 * 
 	 * @return
@@ -45,11 +37,11 @@ public interface IConfigClient
 	
 	
 	/**
-	 * Get configuration from classes and file
+	 * Get configuration from file
 	 * 
 	 * @return
 	 */
-	HierarchicalConfiguration getCombinedConfig();
+	HierarchicalConfiguration loadConfig();
 	
 	
 	/**
@@ -57,31 +49,7 @@ public interface IConfigClient
 	 * 
 	 * @return
 	 */
-	HierarchicalConfiguration getCurrentConfig();
-	
-	
-	/**
-	 * Load from file
-	 * 
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 */
-	void loadFileConfig();
-	
-	
-	/**
-	 * Load from file
-	 * 
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 */
-	void loadLocalConfig();
-	
-	
-	/**
-	 * Load from file
-	 * 
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 */
-	void loadCombinedConfig();
+	HierarchicalConfiguration getConfig();
 	
 	
 	/**

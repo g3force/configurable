@@ -21,12 +21,4 @@ public interface IConfigObserver
 	default void afterApply(final IConfigClient configClient)
 	{
 	}
-	
-	
-	/**
-	 * @param configClient
-	 */
-	default void onLoad(final IConfigClient configClient)
-	{
-	}
 }
