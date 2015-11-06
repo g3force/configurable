@@ -160,6 +160,11 @@ public class ConfigAnnotationProcessor
 				if ((fdCur == null) || overwrite)
 				{
 					data.put(fd.getKey(), fd);
+					if (!fd.fieldDefValue.isEmpty())
+					{
+						fd.fieldValue = fd.fieldDefValue;
+					}
+					applyFieldData(fd, null);
 				} else
 				{
 					fdCur.comment = fd.comment;
@@ -484,7 +489,6 @@ public class ConfigAnnotationProcessor
 							try
 							{
 								Object obj = field.get(null);
-								assert obj != null;
 								if (obj != null)
 								{
 									value = s2vConv.toString(type, obj);
@@ -542,7 +546,6 @@ public class ConfigAnnotationProcessor
 					return;
 				}
 				Object value = s2vConv.parseString(type, fieldData.fieldValue);
-				assert value != null; // FIXME
 				try
 				{
 					field.set(obj, value);
