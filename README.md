@@ -7,6 +7,12 @@ Simply save and load field values to/from a file by adding an annotation to a fi
  * class is registered
  * Registration is looking for existing config file
  * if found: apply all stored configs to all classes
+ * values are converted from String to Object and vice versa (see String2ValueConverter)
+
+## Limitations
+
+ * fields must not be final
+ * 
 
 ## Usage
 
@@ -20,7 +26,7 @@ private static boolean fieldBool;
 options:
  * comment: document the field
  * defValue: default value if no value is stored yet. Optional for static fields, but recommended
- * spezis: 0 or more "specializations"
+ * spezis: 0 or more "specializations". Makes it possible to store different values at the same time
  * defValueSpezis: if you use spezis, use this instead of defValue
  * category: force config category. This is useful if you have muliple different categories (files) in one class.
 
@@ -63,3 +69,5 @@ ConfigRegistration.applySpezis(obj, cat, spezi);
 ```java
 ConfigRegistration.save("<yourCategory>");
 ```
+
+Files are saved as config/<yourCategory>.xml
