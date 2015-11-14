@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,7 +40,7 @@ public class ConfigAnnotationProcessor
 	private static String2ValueConverter					s2vConv	= String2ValueConverter.getDefault();
 																					
 	private final String											category;
-	private final Map<String, ConfigurableFieldData>	data		= new HashMap<>();
+	private final Map<String, ConfigurableFieldData>	data		= new LinkedHashMap<>();
 	private final Set<String>									spezis	= new HashSet<>();
 																					
 																					
