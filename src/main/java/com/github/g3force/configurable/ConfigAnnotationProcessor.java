@@ -129,13 +129,13 @@ public class ConfigAnnotationProcessor
 					}
 				} catch (NoSuchFieldException e)
 				{
-					log.info("Field vanished: " + className + "#" + fieldName);
+					log.info("Field vanished in " + category + ": " + className + "#" + fieldName);
 				} catch (SecurityException e)
 				{
 					log.error("Sec exception", e);
 				} catch (ClassNotFoundException e)
 				{
-					log.info("Class vanished: " + className);
+					log.info("Class vanished in " + category + ": " + className);
 				}
 			}
 		}
@@ -393,7 +393,7 @@ public class ConfigAnnotationProcessor
 		{
 			Class.forName(base);
 			classes.put(base, node);
-		} catch (ClassNotFoundException err)
+		} catch (ClassNotFoundException | NoClassDefFoundError err)
 		{
 			// not a class. Maybe a package
 			for (ConfigurationNode child : node.getChildren())
