@@ -48,8 +48,8 @@ public class ConfigurableTest
 			}
 		});
 		testBool = true;
-		// ConfigRegistration.applySpezis(testBool, "CATEGORY", "");
 		ConfigRegistration.readClasses("CATEGORY");
+		ConfigRegistration.applyConfig("CATEGORY");
 		ConfigRegistration.save("CATEGORY");
 	}
 }
