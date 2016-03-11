@@ -29,12 +29,12 @@ public class ConfigRegistration
 	private static final Logger						log			= Logger.getLogger(ConfigRegistration.class.getName());
 	private final Map<String, ConfigClient>		configs		= new LinkedHashMap<String, ConfigClient>();
 	private static final ConfigRegistration		INSTANCE		= new ConfigRegistration();
-																				
+	
 	private static String								defPath		= "config/";
-																				
+	
 	private static List<IConfigClientsObserver>	observers	= new CopyOnWriteArrayList<IConfigClientsObserver>();
-																				
-																				
+	
+	
 	/**
 	  * 
 	  */
@@ -214,6 +214,18 @@ public class ConfigRegistration
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		return cc.loadConfig();
+	}
+	
+	
+	/**
+	 * Read all fields from all classes and store values internally.
+	 * 
+	 * @param cat
+	 */
+	public static synchronized void readClasses(final String cat)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.readClasses();
 	}
 	
 	

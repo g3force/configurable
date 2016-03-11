@@ -35,27 +35,27 @@ import com.github.g3force.s2vconverter.String2ValueConverter;
 public class ConfigAnnotationProcessor
 {
 	private static final Logger								log		= Logger.getLogger(ConfigAnnotationProcessor.class
-																							.getName());
-																							
+			.getName());
+	
 	private static String2ValueConverter					s2vConv	= String2ValueConverter.getDefault();
-																					
+	
 	private final String											category;
 	private final Map<String, ConfigurableFieldData>	data		= new LinkedHashMap<>();
 	private final Set<String>									spezis	= new HashSet<>();
-																					
-																					
+	
+	
 	private static class ConfigurableFieldData
 	{
 		private String		className;
 		private String		fieldName;
 		private String		fieldSpezi		= "";
-													
+		
 		private String		fieldValue		= "";
 		private String		fieldDefValue	= "";
 		private String		comment			= "";
 		private Class<?>	fieldType;
-								
-								
+		
+		
 		private String getKey()
 		{
 			return className + "." + fieldName + ":" + fieldSpezi;
@@ -159,7 +159,7 @@ public class ConfigAnnotationProcessor
 				if ((fdCur == null) || overwrite)
 				{
 					data.put(fd.getKey(), fd);
-					if (!fd.fieldDefValue.isEmpty())
+					if (!overwrite && !fd.fieldDefValue.isEmpty())
 					{
 						fd.fieldValue = fd.fieldDefValue;
 					}

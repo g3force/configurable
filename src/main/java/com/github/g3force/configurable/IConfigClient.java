@@ -53,6 +53,12 @@ public interface IConfigClient
 	
 	
 	/**
+	 * Read all fields from all registered classes
+	 */
+	void readClasses();
+	
+	
+	/**
 	 * Save to file
 	 * 
 	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>

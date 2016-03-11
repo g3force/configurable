@@ -35,19 +35,19 @@ public class ConfigClient implements IConfigClient
 {
 	@SuppressWarnings("unused")
 	private static final Logger					log				= Logger.getLogger(ConfigClient.class.getName());
-																				
+	
 	private static final String					XML_ENCODING	= "UTF-8";
-																				
+	
 	private final String								name;
 	private final String								path;
 	private final List<IConfigObserver>			observers		= new CopyOnWriteArrayList<IConfigObserver>();
-																				
+	
 	private final ConfigAnnotationProcessor	cap;
 	private final Set<Class<?>>					classes			= new LinkedHashSet<Class<?>>();
-																				
+	
 	private HierarchicalConfiguration			config			= new HierarchicalConfiguration();
-																				
-																				
+	
+	
 	/**
 	 * @param path
 	 * @param name
@@ -203,6 +203,14 @@ public class ConfigClient implements IConfigClient
 		classes.forEach(clazz -> cap.loadClass(clazz, false));
 		config = cap.getEffectiveConfig();
 		return config;
+	}
+	
+	
+	@Override
+	public final void readClasses()
+	{
+		classes.forEach(clazz -> cap.loadClass(clazz, true));
+		config = cap.getEffectiveConfig();
 	}
 	
 	
