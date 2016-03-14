@@ -8,6 +8,9 @@
  */
 package com.github.g3force.configurable;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,11 +31,12 @@ public class ConfigRegistration
 	@SuppressWarnings("unused")
 	private static final Logger						log			= Logger.getLogger(ConfigRegistration.class.getName());
 	private final Map<String, ConfigClient>		configs		= new LinkedHashMap<String, ConfigClient>();
-	private static final ConfigRegistration		INSTANCE		= new ConfigRegistration();
 	
 	private static String								defPath		= "config/";
 	
 	private static List<IConfigClientsObserver>	observers	= new CopyOnWriteArrayList<IConfigClientsObserver>();
+	
+	private static final ConfigRegistration		INSTANCE		= new ConfigRegistration();
 	
 	
 	/**
@@ -40,6 +44,13 @@ public class ConfigRegistration
 	  */
 	private ConfigRegistration()
 	{
+		try
+		{
+			Files.createDirectories(Paths.get(defPath));
+		} catch (IOException e)
+		{
+			log.error("Could not create default config dir: " + defPath, e);
+		}
 	}
 	
 	

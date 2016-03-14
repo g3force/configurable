@@ -224,8 +224,8 @@ public class ConfigAnnotationProcessor
 	 */
 	public synchronized void applyAll()
 	{
-		applySpezi("");
 		spezis.forEach(s -> applySpezi(s));
+		applySpezi("");
 	}
 	
 	
