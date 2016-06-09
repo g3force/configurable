@@ -11,7 +11,7 @@ package com.github.g3force.configurable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,7 +44,7 @@ public class ConfigAnnotationProcessor
 	private final Set<String>									spezis	= new HashSet<>();
 	
 	
-	private static class ConfigurableFieldData
+	private static class ConfigurableFieldData implements Comparable<ConfigurableFieldData>
 	{
 		private String		className;
 		private String		fieldName;
@@ -59,6 +59,18 @@ public class ConfigAnnotationProcessor
 		private String getKey()
 		{
 			return className + "." + fieldName + ":" + fieldSpezi;
+		}
+		
+		
+		@Override
+		public int compareTo(final ConfigurableFieldData o)
+		{
+			int cmp = className.compareToIgnoreCase(o.className);
+			if (cmp != 0)
+			{
+				return cmp;
+			}
+			return fieldName.compareToIgnoreCase(o.fieldName);
 		}
 	}
 	
@@ -183,7 +195,7 @@ public class ConfigAnnotationProcessor
 	 */
 	public synchronized HierarchicalConfiguration getEffectiveConfig()
 	{
-		return getConfig(data.values(), true);
+		return getConfig(new ArrayList<>(data.values()), true);
 	}
 	
 	
@@ -300,11 +312,13 @@ public class ConfigAnnotationProcessor
 	}
 	
 	
-	private HierarchicalConfiguration getConfig(final Collection<ConfigurableFieldData> fData,
+	private HierarchicalConfiguration getConfig(final List<ConfigurableFieldData> fData,
 			final boolean exportMetadata)
 	{
 		final HierarchicalConfiguration config = new HierarchicalConfiguration();
 		config.setDelimiterParsingDisabled(true);
+		
+		Collections.sort(fData);
 		
 		String base = null;
 		for (ConfigurableFieldData fd : fData)
