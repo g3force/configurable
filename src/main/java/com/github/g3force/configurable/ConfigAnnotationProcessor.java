@@ -312,6 +312,54 @@ public class ConfigAnnotationProcessor
 	}
 	
 	
+	/**
+	 * Override a fields value
+	 *
+	 * @param obj the object to apply the config to after overriding
+	 * @param fieldName the name of the field to override
+	 * @param value the value to apply
+	 */
+	public synchronized void overrideField(Object obj, String fieldName, String value)
+	{
+		for (Class<?> c = obj.getClass(); ((c != null) && !c.equals(Object.class)); c = c
+				.getSuperclass())
+		{
+			String className = c.getCanonicalName();
+			data.values().stream()
+					.filter(fd -> fd.className.equals(className))
+					.filter(fd -> fd.fieldName.equals(fieldName))
+					.forEach(fd -> {
+						fd.fieldValue = value;
+						applyFieldData(fd, obj);
+					});
+		}
+	}
+	
+	
+	/**
+	 * Override a fields value
+	 *
+	 * @param clazz the class to apply the config to after overriding
+	 * @param fieldName the name of the field to override
+	 * @param value the value to apply
+	 */
+	public synchronized void overrideField(Class<?> clazz, String fieldName, String value)
+	{
+		for (Class<?> c = clazz; ((c != null) && !c.equals(Object.class)); c = c
+				.getSuperclass())
+		{
+			String className = c.getCanonicalName();
+			data.values().stream()
+					.filter(fd -> fd.className.equals(className))
+					.filter(fd -> fd.fieldName.equals(fieldName))
+					.forEach(fd -> {
+						fd.fieldValue = value;
+						applyFieldData(fd, null);
+					});
+		}
+	}
+	
+	
 	private HierarchicalConfiguration getConfig(final List<ConfigurableFieldData> fData,
 			final boolean exportMetadata)
 	{

@@ -148,4 +148,13 @@ public class ConfigurableTest
 		
 		Assert.assertEquals(10, ConfigClass1.testDouble, 0.0001);
 	}
+	
+	
+	@Test
+	public void testOverride()
+	{
+		ConfigClass1.testDouble = 1;
+		ConfigRegistration.overrideConfig(ConfigClass1.class, CATEGORY, "testDouble", "42");
+		Assert.assertEquals(42.0, ConfigClass1.testDouble, 1e-10);
+	}
 }

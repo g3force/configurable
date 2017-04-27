@@ -207,6 +207,36 @@ public class ConfigRegistration
 	
 	
 	/**
+	 * Override a fields value
+	 * 
+	 * @param obj the object that the change should applied to
+	 * @param cat the category of this config
+	 * @param fieldName the name of the field to override
+	 * @param value the value to apply
+	 */
+	public static synchronized void overrideConfig(final Object obj, String cat, String fieldName, String value)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.getCap().overrideField(obj, fieldName, value);
+	}
+	
+	
+	/**
+	 * Override a fields value
+	 *
+	 * @param clazz the class that the change should applied to
+	 * @param cat the category of this config
+	 * @param fieldName the name of the field to override
+	 * @param value the value to apply
+	 */
+	public static synchronized void overrideConfig(final Class<?> clazz, String cat, String fieldName, String value)
+	{
+		ConfigClient cc = INSTANCE.getConfigClient(cat);
+		cc.getCap().overrideField(clazz, fieldName, value);
+	}
+	
+	
+	/**
 	 * @param cat
 	 * @return
 	 */
