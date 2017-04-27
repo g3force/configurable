@@ -55,6 +55,19 @@ public class ConfigRegistration
 	
 	
 	/**
+	 * Update the default config path (default: config/)
+	 * <br>
+	 * Note: This must be called before config clients are added
+	 *
+	 * @param path a new default path
+	 */
+	public static void setDefPath(String path)
+	{
+		defPath = path;
+	}
+	
+	
+	/**
 	 * @param observer
 	 */
 	public static synchronized void addObserver(final IConfigClientsObserver observer)
