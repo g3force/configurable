@@ -106,8 +106,8 @@ public class ConfigurableTest
 	@Test
 	public void testSpezi()
 	{
-		// default value for fields with spezi is the one that was defined last
-		Assert.assertEquals(3, ConfigClass2.testSpezi, 0.0001);
+		// default value for fields with spezi is the empty spezi
+		Assert.assertEquals(1, ConfigClass2.testSpezi, 0.0001);
 		
 		ConfigRegistration.applySpezi(CATEGORY, "CONF1");
 		Assert.assertTrue(ConfigClass2.testSpezi == 2);
