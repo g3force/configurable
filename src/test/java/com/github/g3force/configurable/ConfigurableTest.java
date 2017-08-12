@@ -6,7 +6,10 @@
  * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
  * *********************************************************
  */
-package configurable;
+package com.github.g3force.configurable;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,15 +17,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.IConfigClient;
-import com.github.g3force.configurable.IConfigObserver;
-
-import configurable.ConfigClass1.ETest;
+import com.github.g3force.configurable.ConfigClass1.ETest;
 
 
 /**
@@ -31,17 +31,23 @@ import configurable.ConfigClass1.ETest;
 public class ConfigurableTest
 {
 	@SuppressWarnings("unused")
-	private static final Logger	log				= Logger.getLogger(ConfigurableTest.class.getName());
+	private static final Logger log = Logger.getLogger(ConfigurableTest.class.getName());
 	
 	
-	private static final String	CATEGORY			= "default";
-	private final Path				configFilePath	= Paths.get("config", CATEGORY + ".xml");
+	private static final String CATEGORY = "default";
+	private final Path configFilePath = Paths.get("config", CATEGORY + ".xml");
 	
 	
 	/**
 	 */
 	@Before
 	public void before()
+	{
+		deleteConfigFile();
+	}
+	
+	
+	private void deleteConfigFile()
 	{
 		try
 		{
@@ -54,6 +60,13 @@ public class ConfigurableTest
 		{
 			log.error("", e);
 		}
+	}
+	
+	
+	@After
+	public void after()
+	{
+		// deleteConfigFile();
 	}
 	
 	
@@ -156,5 +169,21 @@ public class ConfigurableTest
 		ConfigClass1.testDouble = 1;
 		ConfigRegistration.overrideConfig(ConfigClass1.class, CATEGORY, "testDouble", "42");
 		Assert.assertEquals(42.0, ConfigClass1.testDouble, 1e-10);
+	}
+	
+	
+	@Test
+	public void testDefValue()
+	{
+		ConfigAnnotationProcessor cap = new ConfigAnnotationProcessor("read");
+		cap.loadClass(ConfigClass4.class, false);
+		assertThat(ConfigClass4.testBoolFalse).isEqualTo(false);
+		assertThat(ConfigClass4.testBoolTrue).isEqualTo(true);
+		assertThat(ConfigClass4.testEnum.name()).isEqualTo("ONE");
+		assertThat(ConfigClass4.testEnumDefValue.name()).isEqualTo("TWO");
+		assertThat(ConfigClass4.testDouble).isEqualTo(1.0, within(1e-10));
+		assertThat(ConfigClass4.testDoubleWithDefault).isEqualTo(2.0, within(1e-10));
+		assertThat(ConfigClass4.testDefaultDifferent).isEqualTo(6.0);
+		assertThat(ConfigClass4.testStoredDifferent).isEqualTo(42.0, within(1e-10));
 	}
 }

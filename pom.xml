@@ -32,6 +32,13 @@
 	</dependency>
 
     <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.5.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.github.g3force</groupId>
       <artifactId>String2ValueConverter</artifactId>
       <version>v1.6</version>

@@ -588,6 +588,16 @@ public class ConfigAnnotationProcessor
 						{
 							defValue = conf.defValueSpezis()[speziId];
 						}
+						if (!"".equals(defValue))
+						{
+							try
+							{
+								defValue = s2vConv.toString(type, s2vConv.parseString(type, defValue));
+							} catch (IllegalArgumentException err1)
+							{
+								log.warn("Could not convert defValue of field " + name + ": " + defValue, err1);
+							}
+						}
 						
 						String value;
 						if (((field.getModifiers() & Modifier.STATIC) == 0) // non static field

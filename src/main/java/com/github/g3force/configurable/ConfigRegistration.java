@@ -29,14 +29,14 @@ import org.apache.log4j.Logger;
 public class ConfigRegistration
 {
 	@SuppressWarnings("unused")
-	private static final Logger						log			= Logger.getLogger(ConfigRegistration.class.getName());
-	private final Map<String, ConfigClient>		configs		= new LinkedHashMap<String, ConfigClient>();
+	private static final Logger log = Logger.getLogger(ConfigRegistration.class.getName());
+	private final Map<String, ConfigClient> configs = new LinkedHashMap<>();
 	
-	private static String								defPath		= "config/";
+	private static String defPath = "config/";
 	
-	private static List<IConfigClientsObserver>	observers	= new CopyOnWriteArrayList<IConfigClientsObserver>();
+	private static List<IConfigClientsObserver> observers = new CopyOnWriteArrayList<>();
 	
-	private static final ConfigRegistration		INSTANCE		= new ConfigRegistration();
+	static final ConfigRegistration INSTANCE = new ConfigRegistration();
 	
 	
 	/**
@@ -99,7 +99,11 @@ public class ConfigRegistration
 	}
 	
 	
-	private ConfigClient getConfigClient(final String key)
+	/**
+	 * @param key the category
+	 * @return the config client of given category
+	 */
+	ConfigClient getConfigClient(final String key)
 	{
 		ConfigClient cc = configs.get(key);
 		if (cc == null)

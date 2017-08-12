@@ -6,10 +6,7 @@
  * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
  * *********************************************************
  */
-package configurable;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
+package com.github.g3force.configurable;
 
 
 /**
@@ -29,6 +26,12 @@ public class ConfigClass1
 	
 	@Configurable(comment = "Document this field")
 	static double	testNoDefault	= 5;
+	
+	@Configurable(comment = "Document this field", defValue = "6")
+	static double testDefaultDifferent = 5;
+	
+	@Configurable(comment = "Document this field")
+	static double testStoredDifferent = 5;
 	
 	static
 	{

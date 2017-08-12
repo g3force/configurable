@@ -6,24 +6,28 @@
  * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
  * *********************************************************
  */
-package configurable;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
+package com.github.g3force.configurable;
 
 
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class ConfigClass2
+public class ConfigClass3
 {
-	@Configurable(comment = "Document this field", spezis = { "", "CONF1", "CONF2" }, defValueSpezis = { "1", "2", "3" })
-	static double testSpezi;
 	
+	@Configurable(comment = "Document this field", spezis = { "", "CONF1", "CONF2" }, defValueSpezis = { "1", "2", "3" })
+	double testSpezi;
 	
 	static
 	{
-		ConfigRegistration.registerClass("default", ConfigClass2.class);
+		ConfigRegistration.registerClass("default", ConfigClass3.class);
 	}
 	
+	
+	/**
+	 */
+	public ConfigClass3()
+	{
+		ConfigRegistration.applySpezis(this, "default", "CONF1");
+	}
 }
