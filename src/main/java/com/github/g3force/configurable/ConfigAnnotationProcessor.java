@@ -23,7 +23,8 @@ import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.s2vconverter.String2ValueConverter;
 
@@ -34,7 +35,7 @@ import com.github.g3force.s2vconverter.String2ValueConverter;
  */
 public class ConfigAnnotationProcessor
 {
-	private static final Logger log = Logger.getLogger(ConfigAnnotationProcessor.class.getName());
+	private static final Logger log = LogManager.getLogger(ConfigAnnotationProcessor.class.getName());
 
 	private static String2ValueConverter s2vConv = String2ValueConverter.getDefault();
 
@@ -180,13 +181,13 @@ public class ConfigAnnotationProcessor
 					}
 				} catch (NoSuchFieldException e)
 				{
-					log.info("Field vanished in " + category + ": " + className + "#" + fieldName);
+					log.info("Field vanished in {}: {}#{}", category, className, fieldName);
 				} catch (SecurityException e)
 				{
 					log.error("Sec exception", e);
 				} catch (ClassNotFoundException e)
 				{
-					log.info("Class vanished in " + category + ": " + className);
+					log.info("Class vanished in {}: {}", category, className);
 				}
 			}
 		}
@@ -540,7 +541,7 @@ public class ConfigAnnotationProcessor
 			write(clazz, obj, fieldData);
 		} catch (ClassNotFoundException err)
 		{
-			log.error("Could not find class with name " + fieldData.className);
+			log.error("Could not find class with name {}", fieldData.className);
 		}
 	}
 
@@ -565,7 +566,7 @@ public class ConfigAnnotationProcessor
 
 				if ((field.getModifiers() & Modifier.FINAL) != 0)
 				{
-					log.error("Configurable field " + clazz.getName() + "#" + name + " must not be final");
+					log.error("Configurable field {}#{} must not be final", clazz.getName(), name);
 					continue;
 				}
 
@@ -675,6 +676,6 @@ public class ConfigAnnotationProcessor
 				return;
 			}
 		}
-		log.warn("Could not find field: " + fieldData.fieldName);
+		log.warn("Could not find field: {}", fieldData.fieldName);
 	}
 }

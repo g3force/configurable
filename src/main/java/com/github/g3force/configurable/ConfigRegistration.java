@@ -18,7 +18,8 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
  */
 public class ConfigRegistration
 {
-	private static final Logger log = Logger.getLogger(ConfigRegistration.class.getName());
+	private static final Logger log = LogManager.getLogger(ConfigRegistration.class.getName());
 	private final Map<String, ConfigClient> configs = new LinkedHashMap<>();
 
 	private static String defPath = "config/";
@@ -36,9 +37,6 @@ public class ConfigRegistration
 	private static final ConfigRegistration INSTANCE = new ConfigRegistration();
 
 
-	/**
-	  *
-	  */
 	private ConfigRegistration()
 	{
 		try
@@ -64,27 +62,18 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @param observer
-	 */
 	public static synchronized void addObserver(final IConfigClientsObserver observer)
 	{
 		observers.add(observer);
 	}
 
 
-	/**
-	 * @param observer
-	 */
 	public static synchronized void removeObserver(final IConfigClientsObserver observer)
 	{
 		observers.remove(observer);
 	}
 
 
-	/**
-	 * @param cc
-	 */
 	public static synchronized void registerConfigClient(final ConfigClient cc)
 	{
 		INSTANCE.configs.put(cc.getName(), cc);
@@ -113,10 +102,6 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @param key
-	 * @param classes
-	 */
 	public static synchronized void registerClass(final String key, final Class<?>... classes)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(key);
@@ -127,10 +112,6 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @param key
-	 * @return
-	 */
 	public static synchronized boolean save(final String key)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(key);
@@ -141,8 +122,8 @@ public class ConfigRegistration
 	/**
 	 * Register a callback to a config category to get informed by changes
 	 *
-	 * @param cat
-	 * @param callback
+	 * @param cat the category
+	 * @param callback the callback
 	 */
 	public static synchronized void registerConfigurableCallback(final String cat, final IConfigObserver callback)
 	{
@@ -154,8 +135,8 @@ public class ConfigRegistration
 	/**
 	 * Unregister previously registered callbacks
 	 *
-	 * @param cat
-	 * @param callback
+	 * @param cat the category
+	 * @param callback the callback
 	 */
 	public static synchronized void unregisterConfigurableCallback(final String cat, final IConfigObserver callback)
 	{
@@ -167,9 +148,9 @@ public class ConfigRegistration
 	/**
 	 * Apply the spezi to the object in category
 	 *
-	 * @param obj
-	 * @param cat
-	 * @param spezi
+	 * @param obj the object
+	 * @param cat the category
+	 * @param spezi the specialization
 	 */
 	public static synchronized void applySpezis(final Object obj, final String cat, final String spezi)
 	{
@@ -247,10 +228,6 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @param cat
-	 * @return
-	 */
 	public static synchronized HierarchicalConfiguration getConfig(final String cat)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
@@ -258,10 +235,6 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @param cat
-	 * @return
-	 */
 	public static synchronized HierarchicalConfiguration loadConfig(final String cat)
 	{
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
@@ -281,9 +254,6 @@ public class ConfigRegistration
 	}
 
 
-	/**
-	 * @return
-	 */
 	public static synchronized List<String> getConfigClients()
 	{
 		return new ArrayList<>(INSTANCE.configs.keySet());

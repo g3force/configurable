@@ -16,7 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +25,9 @@ import org.junit.Test;
 import com.github.g3force.configurable.ConfigClass1.ETest;
 
 
-/**
- *
- */
 public class ConfigurableTest
 {
-	private static final Logger log = Logger.getLogger(ConfigurableTest.class.getName());
+	private static final Logger log = LogManager.getLogger(ConfigurableTest.class.getName());
 
 	private static final String CATEGORY = "default";
 	private final Path configFilePath = Paths.get("config", CATEGORY + ".xml");

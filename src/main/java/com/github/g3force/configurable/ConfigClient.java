@@ -22,7 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -30,7 +31,7 @@ import org.apache.log4j.Logger;
  */
 public class ConfigClient implements IConfigClient
 {
-	private static final Logger log = Logger.getLogger(ConfigClient.class.getName());
+	private static final Logger log = LogManager.getLogger(ConfigClient.class.getName());
 
 	private static final String XML_ENCODING = "UTF-8";
 
@@ -137,11 +138,11 @@ public class ConfigClient implements IConfigClient
 
 		} catch (final ConfigurationException err)
 		{
-			log.error("Unable to save config '" + name + "' to '" + filePath + "'.");
+			log.error("Unable to save config '{}' to '{}'.", name, filePath);
 			return false;
 		} catch (final FileNotFoundException err)
 		{
-			log.error("Unable to access the file to save the config to: " + filePath, err);
+			log.error("Unable to access the file to save the config to: {}", filePath, err);
 		} finally
 		{
 			try
