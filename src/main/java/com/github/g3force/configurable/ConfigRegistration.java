@@ -23,24 +23,21 @@ import org.apache.log4j.Logger;
 
 /**
  * Central registration for all configs
- * 
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class ConfigRegistration
 {
-	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(ConfigRegistration.class.getName());
 	private final Map<String, ConfigClient> configs = new LinkedHashMap<>();
-	
+
 	private static String defPath = "config/";
-	
+
 	private static List<IConfigClientsObserver> observers = new CopyOnWriteArrayList<>();
-	
-	static final ConfigRegistration INSTANCE = new ConfigRegistration();
-	
-	
+
+	private static final ConfigRegistration INSTANCE = new ConfigRegistration();
+
+
 	/**
-	  * 
+	  *
 	  */
 	private ConfigRegistration()
 	{
@@ -52,8 +49,8 @@ public class ConfigRegistration
 			log.error("Could not create default config dir: " + defPath, e);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Update the default config path (default: config/)
 	 * <br>
@@ -65,8 +62,8 @@ public class ConfigRegistration
 	{
 		defPath = path;
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -74,8 +71,8 @@ public class ConfigRegistration
 	{
 		observers.add(observer);
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -83,10 +80,9 @@ public class ConfigRegistration
 	{
 		observers.remove(observer);
 	}
-	
-	
+
+
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 * @param cc
 	 */
 	public static synchronized void registerConfigClient(final ConfigClient cc)
@@ -97,8 +93,8 @@ public class ConfigRegistration
 			o.onNewConfigClient(cc.getName());
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param key the category
 	 * @return the config client of given category
@@ -115,10 +111,9 @@ public class ConfigRegistration
 		}
 		return cc;
 	}
-	
-	
+
+
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 * @param key
 	 * @param classes
 	 */
@@ -130,10 +125,9 @@ public class ConfigRegistration
 			cc.putClass(c);
 		}
 	}
-	
-	
+
+
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 * @param key
 	 * @return
 	 */
@@ -142,11 +136,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(key);
 		return cc.saveCurrentConfig();
 	}
-	
-	
+
+
 	/**
 	 * Register a callback to a config category to get informed by changes
-	 * 
+	 *
 	 * @param cat
 	 * @param callback
 	 */
@@ -155,11 +149,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.addObserver(callback);
 	}
-	
-	
+
+
 	/**
 	 * Unregister previously registered callbacks
-	 * 
+	 *
 	 * @param cat
 	 * @param callback
 	 */
@@ -168,11 +162,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.removeObserver(callback);
 	}
-	
-	
+
+
 	/**
 	 * Apply the spezi to the object in category
-	 * 
+	 *
 	 * @param obj
 	 * @param cat
 	 * @param spezi
@@ -182,11 +176,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.getCap().applySpezi(obj, spezi);
 	}
-	
-	
+
+
 	/**
 	 * Apply the spezi to all classes
-	 * 
+	 *
 	 * @param cat
 	 * @param spezi
 	 */
@@ -195,11 +189,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.getCap().applySpezi(spezi);
 	}
-	
-	
+
+
 	/**
 	 * Apply the spezi to all classes and all categories
-	 * 
+	 *
 	 * @param spezi
 	 */
 	public static synchronized void applyGlobalSpezi(final String spezi)
@@ -209,11 +203,11 @@ public class ConfigRegistration
 			cc.getCap().applySpezi(spezi);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Apply all and notify observers
-	 * 
+	 *
 	 * @param cat
 	 */
 	public static synchronized void applyConfig(final String cat)
@@ -221,11 +215,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.applyConfig();
 	}
-	
-	
+
+
 	/**
 	 * Override a fields value
-	 * 
+	 *
 	 * @param obj the object that the change should applied to
 	 * @param cat the category of this config
 	 * @param fieldName the name of the field to override
@@ -236,8 +230,8 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.getCap().overrideField(obj, fieldName, value);
 	}
-	
-	
+
+
 	/**
 	 * Override a fields value
 	 *
@@ -251,8 +245,8 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.getCap().overrideField(clazz, fieldName, value);
 	}
-	
-	
+
+
 	/**
 	 * @param cat
 	 * @return
@@ -262,8 +256,8 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		return cc.getConfig();
 	}
-	
-	
+
+
 	/**
 	 * @param cat
 	 * @return
@@ -273,11 +267,11 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		return cc.loadConfig();
 	}
-	
-	
+
+
 	/**
 	 * Read all fields from all classes and store values internally.
-	 * 
+	 *
 	 * @param cat
 	 */
 	public static synchronized void readClasses(final String cat)
@@ -285,8 +279,8 @@ public class ConfigRegistration
 		ConfigClient cc = INSTANCE.getConfigClient(cat);
 		cc.readClasses();
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */

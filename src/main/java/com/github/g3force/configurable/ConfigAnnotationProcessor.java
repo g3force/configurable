@@ -10,7 +10,13 @@ package com.github.g3force.configurable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
@@ -25,39 +31,36 @@ import com.github.g3force.s2vconverter.String2ValueConverter;
 /**
  * Read from a given set of classes all {@link Configurable} annotations
  * and fill the associated fields with data from config file
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class ConfigAnnotationProcessor
 {
-	private static final Logger log = Logger.getLogger(ConfigAnnotationProcessor.class
-			.getName());
-	
+	private static final Logger log = Logger.getLogger(ConfigAnnotationProcessor.class.getName());
+
 	private static String2ValueConverter s2vConv = String2ValueConverter.getDefault();
-	
+
 	private final String category;
 	private final Map<String, ConfigurableFieldData> data = new LinkedHashMap<>();
 	private final Set<String> spezis = new HashSet<>();
-	
-	
+
+
 	private static class ConfigurableFieldData implements Comparable<ConfigurableFieldData>
 	{
 		private String className;
 		private String fieldName;
 		private String fieldSpezi = "";
-		
+
 		private String fieldValue = "";
 		private String fieldDefValue = "";
 		private String comment = "";
 		private Class<?> fieldType;
-		
-		
+
+
 		private String getKey()
 		{
 			return className + "." + fieldName + ":" + fieldSpezi;
 		}
-		
-		
+
+
 		@Override
 		public int compareTo(final ConfigurableFieldData o)
 		{
@@ -68,19 +71,19 @@ public class ConfigAnnotationProcessor
 			}
 			return fieldName.compareToIgnoreCase(o.fieldName);
 		}
-		
-		
+
+
 		@Override
 		public boolean equals(Object o)
 		{
 			if (this == o)
 				return true;
-			
+
 			if (o == null || getClass() != o.getClass())
 				return false;
-			
+
 			ConfigurableFieldData that = (ConfigurableFieldData) o;
-			
+
 			return new EqualsBuilder()
 					.append(className, that.className)
 					.append(fieldName, that.fieldName)
@@ -91,8 +94,8 @@ public class ConfigAnnotationProcessor
 					.append(fieldType, that.fieldType)
 					.isEquals();
 		}
-		
-		
+
+
 		@Override
 		public int hashCode()
 		{
@@ -107,8 +110,8 @@ public class ConfigAnnotationProcessor
 					.toHashCode();
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param name the category name
 	 */
@@ -117,8 +120,8 @@ public class ConfigAnnotationProcessor
 	{
 		category = name;
 	}
-	
-	
+
+
 	private String getAttribute(final ConfigurationNode node, final String name)
 	{
 		List<ConfigurationNode> attrs = node.getAttributes(name);
@@ -129,8 +132,8 @@ public class ConfigAnnotationProcessor
 		}
 		return base;
 	}
-	
-	
+
+
 	/**
 	 * Load field data from given config object. Existing values will be overwritten
 	 * Note: It will not be applies yet, use one of the apply methods for this.
@@ -141,9 +144,9 @@ public class ConfigAnnotationProcessor
 	public synchronized void loadConfiguration(final HierarchicalConfiguration config)
 	{
 		String base = getAttribute(config.getRoot(), "base");
-		
+
 		Map<String, ConfigurationNode> classes = getClassNodesFromConfigRec(base, config.getRoot());
-		
+
 		for (Map.Entry<String, ConfigurationNode> entry : classes.entrySet())
 		{
 			String className = entry.getKey();
@@ -188,14 +191,13 @@ public class ConfigAnnotationProcessor
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Load all configurable fields from clazz and its subclasses
 	 *
 	 * @param clazz the class to load
 	 * @param overwrite existing values
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public synchronized void loadClass(final Class<?> clazz, final boolean overwrite)
@@ -226,8 +228,8 @@ public class ConfigAnnotationProcessor
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Create the effective config from currently loaded fields
 	 *
@@ -238,8 +240,8 @@ public class ConfigAnnotationProcessor
 	{
 		return getConfig(new ArrayList<>(data.values()), true);
 	}
-	
-	
+
+
 	/**
 	 * Create the minimal config from currently loaded fields.
 	 * All fields that have their default value, will be skipped
@@ -250,7 +252,7 @@ public class ConfigAnnotationProcessor
 	public synchronized HierarchicalConfiguration getMinimalConfig()
 	{
 		List<ConfigurableFieldData> minData = new ArrayList<>(data.size());
-		
+
 		for (ConfigurableFieldData fd : data.values())
 		{
 			if (!fd.fieldValue.equals(fd.fieldDefValue))
@@ -258,11 +260,11 @@ public class ConfigAnnotationProcessor
 				minData.add(fd);
 			}
 		}
-		
+
 		return getConfig(minData, false);
 	}
-	
-	
+
+
 	/**
 	 * @param obj apply all spezis to the given instance
 	 */
@@ -272,8 +274,8 @@ public class ConfigAnnotationProcessor
 		applySpezi(obj, "");
 		spezis.forEach(s -> applySpezi(obj, s));
 	}
-	
-	
+
+
 	/**
 	 * Apply all spezis to all static fields
 	 */
@@ -283,8 +285,8 @@ public class ConfigAnnotationProcessor
 		spezis.forEach(this::applySpezi);
 		applySpezi("");
 	}
-	
-	
+
+
 	/**
 	 * @param spezi apply this spezi only
 	 */
@@ -296,8 +298,8 @@ public class ConfigAnnotationProcessor
 				.filter(fd -> fd.fieldSpezi.equals(spezi))
 				.forEach(fd -> applyFieldData(fd, null));
 	}
-	
-	
+
+
 	/**
 	 * Apply values to all fields of the given object. SubClasses will be considered.
 	 *
@@ -317,8 +319,8 @@ public class ConfigAnnotationProcessor
 					.forEach(fd -> applyFieldData(fd, obj));
 		}
 	}
-	
-	
+
+
 	/**
 	 * Apply values to all fields of the given class. SubClasses will be considered.
 	 *
@@ -338,8 +340,8 @@ public class ConfigAnnotationProcessor
 					.forEach(fd -> applyFieldData(fd, null));
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param spezi the spezi to add
 	 */
@@ -348,8 +350,8 @@ public class ConfigAnnotationProcessor
 	{
 		spezis.add(spezi);
 	}
-	
-	
+
+
 	/**
 	 * @param spezi the spezi to remove
 	 */
@@ -358,8 +360,8 @@ public class ConfigAnnotationProcessor
 	{
 		spezis.remove(spezi);
 	}
-	
-	
+
+
 	/**
 	 * Override a fields value
 	 *
@@ -383,8 +385,8 @@ public class ConfigAnnotationProcessor
 					});
 		}
 	}
-	
-	
+
+
 	/**
 	 * Override a fields value
 	 *
@@ -408,16 +410,16 @@ public class ConfigAnnotationProcessor
 					});
 		}
 	}
-	
-	
+
+
 	private HierarchicalConfiguration getConfig(final List<ConfigurableFieldData> fData,
 			final boolean exportMetadata)
 	{
 		final HierarchicalConfiguration config = new HierarchicalConfiguration();
 		config.setDelimiterParsingDisabled(true);
-		
+
 		Collections.sort(fData);
-		
+
 		String base = null;
 		for (ConfigurableFieldData fd : fData)
 		{
@@ -429,15 +431,15 @@ public class ConfigAnnotationProcessor
 				base = greatestCommonPrefix(base, fd.className);
 			}
 		}
-		
+
 		if (base == null)
 		{
 			return config;
 		}
-		
+
 		config.getRoot().setName(base);
 		config.getRoot().addAttribute(new HierarchicalConfiguration.Node("base", base));
-		
+
 		for (ConfigurableFieldData fieldData : fData)
 		{
 			if (fieldData.fieldType == null)
@@ -457,11 +459,11 @@ public class ConfigAnnotationProcessor
 			}
 			config.append(cfg);
 		}
-		
+
 		return config;
 	}
-	
-	
+
+
 	private List<Class<?>> getClassAndSubClasses(final Class<?> mainClazz)
 	{
 		Class<?> clazz = mainClazz;
@@ -473,8 +475,8 @@ public class ConfigAnnotationProcessor
 		}
 		return classes;
 	}
-	
-	
+
+
 	private String greatestCommonPrefix(final String a, final String b)
 	{
 		String[] pkgsA = a.split("\\.");
@@ -495,8 +497,8 @@ public class ConfigAnnotationProcessor
 		}
 		return prefix.toString();
 	}
-	
-	
+
+
 	private Map<String, ConfigurationNode> getClassNodesFromConfigRec(final String base,
 			final ConfigurationNode node)
 	{
@@ -512,24 +514,24 @@ public class ConfigAnnotationProcessor
 			{
 				classes.putAll(getClassNodesFromConfigRec(base + "." + child.getName(), child));
 			}
-			
+
 		}
 		return classes;
 	}
-	
-	
+
+
 	private String escape(final String str)
 	{
 		return StringEscapeUtils.escapeXml(str);
 	}
-	
-	
+
+
 	private String unescape(final String str)
 	{
 		return StringEscapeUtils.unescapeXml(str);
 	}
-	
-	
+
+
 	private void applyFieldData(final ConfigurableFieldData fieldData, final Object obj)
 	{
 		try
@@ -541,8 +543,8 @@ public class ConfigAnnotationProcessor
 			log.error("Could not find class with name " + fieldData.className);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Read values from fields and generate {@link ConfigurableFieldData}
 	 *
@@ -552,7 +554,7 @@ public class ConfigAnnotationProcessor
 	private List<ConfigurableFieldData> read(final Class<?> clazz)
 	{
 		List<ConfigurableFieldData> dataRead = new ArrayList<>();
-		
+
 		for (Field field : clazz.getDeclaredFields())
 		{
 			if (field.isAnnotationPresent(Configurable.class))
@@ -560,26 +562,26 @@ public class ConfigAnnotationProcessor
 				Class<?> type = field.getType();
 				String name = field.getName();
 				field.setAccessible(true);
-				
+
 				if ((field.getModifiers() & Modifier.FINAL) != 0)
 				{
 					log.error("Configurable field " + clazz.getName() + "#" + name + " must not be final");
 					continue;
 				}
-				
+
 				Configurable conf = field.getAnnotation(Configurable.class);
 				String cat = conf.category();
-				
+
 				if (cat.isEmpty() || cat.equals(category))
 				{
 					String comment = conf.comment();
 					String[] declaredSpezis = conf.spezis();
-					
+
 					if (declaredSpezis.length == 0)
 					{
 						declaredSpezis = new String[] { "" };
 					}
-					
+
 					int speziId = 0;
 					for (String spezi : declaredSpezis)
 					{
@@ -598,7 +600,7 @@ public class ConfigAnnotationProcessor
 								log.warn("Could not convert defValue of field " + name + ": " + defValue, err1);
 							}
 						}
-						
+
 						String value;
 						if (((field.getModifiers() & Modifier.STATIC) == 0) // non static field
 								|| (!spezi.isEmpty() && !defValue.isEmpty()))
@@ -623,7 +625,7 @@ public class ConfigAnnotationProcessor
 								continue;
 							}
 						}
-						
+
 						ConfigurableFieldData fieldDataSpezi = new ConfigurableFieldData();
 						fieldDataSpezi.className = clazz.getName();
 						fieldDataSpezi.fieldName = name;
@@ -640,8 +642,8 @@ public class ConfigAnnotationProcessor
 		}
 		return dataRead;
 	}
-	
-	
+
+
 	/**
 	 * Write provided fieldData into field of clazz.
 	 *

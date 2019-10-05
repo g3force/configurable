@@ -28,51 +28,36 @@ import org.xml.sax.SAXException;
 
 /**
  * {@link OutputStream} implementation that formats XML files
- * 
- * @author Gero
  */
 public class PrettyXMLOutputStream extends OutputStream
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	private ByteArrayOutputStream	buffer	= new ByteArrayOutputStream();
-	private final String				encoding;
-	private final OutputStream		outStream;
-	
-	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
-	/**
-	 * @param outStream
-	 * @param encoding
-	 */
+	private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+	private final String encoding;
+	private final OutputStream outStream;
+
+
 	public PrettyXMLOutputStream(final OutputStream outStream, final String encoding)
 	{
 		super();
 		this.outStream = outStream;
 		this.encoding = encoding;
 	}
-	
-	
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
+
+
 	@Override
-	public void write(final byte[] b, final int off, final int len) throws IOException
+	public void write(final byte[] b, final int off, final int len)
 	{
 		buffer.write(b, off, len);
 	}
-	
-	
+
+
 	@Override
-	public void write(final int b) throws IOException
+	public void write(final int b)
 	{
 		buffer.write(b);
 	}
-	
-	
+
+
 	@Override
 	public void flush() throws IOException
 	{
@@ -84,7 +69,7 @@ public class PrettyXMLOutputStream extends OutputStream
 			try
 			{
 				final DocumentBuilder b = f.newDocumentBuilder();
-				
+
 				final InputSource sourceXML = new InputSource(new ByteArrayInputStream(buffer.toByteArray()));
 				doc = b.parse(sourceXML);
 			} catch (final ParserConfigurationException err)
@@ -94,37 +79,37 @@ public class PrettyXMLOutputStream extends OutputStream
 			{
 				throw new IOException("Unable to parse the document which should be written!", err);
 			}
-			
-			
+
+
 			// Pretty print
 			final DOMImplementationLS domLS = (DOMImplementationLS) doc.getImplementation();
 			final LSSerializer serializer = domLS.createLSSerializer();
-			
+
 			final DOMConfiguration domConfig = serializer.getDomConfig();
 			domConfig.setParameter("format-pretty-print", Boolean.TRUE);
 			serializer.setNewLine("\n");
-			
-			
+
+
 			// Prepare output...
 			final LSOutput output = domLS.createLSOutput();
 			output.setEncoding(encoding);
 			output.setByteStream(outStream);
-			
+
 			// Write!
 			serializer.write(doc, output);
-			
+
 			buffer.reset();
 		}
 	}
-	
-	
+
+
 	@Override
 	public void close() throws IOException
 	{
 		if (buffer != null)
 		{
 			flush();
-			
+
 			buffer.close();
 			buffer = null;
 		}
