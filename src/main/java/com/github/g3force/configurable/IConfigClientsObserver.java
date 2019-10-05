@@ -9,12 +9,9 @@
 package com.github.g3force.configurable;
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Observer for config clients.
  */
 public interface IConfigClientsObserver
 {
-	/**
-	 * @param newClient
-	 */
 	void onNewConfigClient(String newClient);
 }

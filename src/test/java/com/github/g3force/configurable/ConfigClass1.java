@@ -10,34 +10,34 @@ package com.github.g3force.configurable;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ *
  */
 public class ConfigClass1
 {
-	
+
 	@Configurable(comment = "Document this field", defValue = "false")
-	static boolean	testBool;
-	
+	static boolean testBool;
+
 	@Configurable(comment = "Document this field", defValue = "1")
-	static double	testDouble;
-	
+	static double testDouble;
+
 	@Configurable(comment = "Document this field", defValue = "ONE")
-	static ETest	testEnum;
-	
+	static ETest testEnum;
+
 	@Configurable(comment = "Document this field")
-	static double	testNoDefault	= 5;
-	
+	static double testNoDefault = 5;
+
 	@Configurable(comment = "Document this field", defValue = "6")
 	static double testDefaultDifferent = 5;
-	
+
 	@Configurable(comment = "Document this field")
 	static double testStoredDifferent = 5;
-	
+
 	static
 	{
 		ConfigRegistration.registerClass("default", ConfigClass1.class);
 	}
-	
+
 	enum ETest
 	{
 		ONE,

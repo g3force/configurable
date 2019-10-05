@@ -9,15 +9,10 @@
 package com.github.g3force.configurable;
 
 /**
- * Used to observe a config client
- * 
- * @author Gero
+ * Used to observe a config client.
  */
 public interface IConfigObserver
 {
-	/**
-	 * @param configClient
-	 */
 	default void afterApply(final IConfigClient configClient)
 	{
 	}

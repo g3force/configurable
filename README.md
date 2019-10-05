@@ -12,7 +12,6 @@ Simply save and load field values to/from a file by adding an annotation to a fi
 ## Limitations
 
  * fields must not be final
- * 
 
 ## Usage
 
@@ -46,13 +45,13 @@ static
 
 ```java
 ConfigRegistration.registerConfigurableCallback("<your category>", new IConfigObserver()
-		{
-			@Override
-			public void afterApply(IConfigClient configClient)
-			{
-				// called after all values were applied.
-			}
-		});
+{
+    @Override
+    public void afterApply(IConfigClient configClient)
+    {
+        // called after all values were applied.
+    }
+});
 ```
 
 ### Apply config and spezis
